@@ -1,0 +1,19 @@
+{
+  "name": "baresexp",
+  "version": "1.0.0",
+  "description": "Minimal token AI agent instruction language with full TypeScript support",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "npm run build && node --test tests/roundtrip.test.js",
+    "lint": "eslint src --ext .ts"
+  },
+  "keywords": ["ai", "llm", "agent", "prompt-engineering", "s-expression"],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.8.3"
+  }
+}
