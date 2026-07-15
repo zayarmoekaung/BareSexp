@@ -1,19 +1,23 @@
 {
   "name": "baresexp",
   "version": "1.0.0",
-  "description": "Minimal token AI agent instruction language with full TypeScript support",
+  "description": "Minimal token S-expression format AI agent instruction language with full TypeScript support",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
-    "test": "npm run build && node --test tests/roundtrip.test.js tests/minimal-mode.test.js",
-    "lint": "eslint src --ext .ts"
+   "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zayarmoekaung/BareSexp.git"
   },
   "keywords": ["ai", "llm", "agent", "prompt-engineering", "s-expression"],
+  "author": "Zayar Moe Kaung <zayarmoekaung@gmail.com>",
   "license": "MIT",
-  "devDependencies": {
-    "@types/node": "^24.0.0",
-    "typescript": "^5.8.3"
+  "scripts": {
+     "build": "tsc",
+    "prepublishOnly": "npm run build"
   }
 }
