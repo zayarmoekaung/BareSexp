@@ -1,14 +1,22 @@
-import { Task, Step, Tool, OutputSpec, Options } from './types.js';
+import { Task, Step, Tool, OutputSpec, Options, CompileOptions, BareSexpResult, MetadataStore, OutputMode } from './types.js';
 import { compileBareSexp } from './compiler.js';
 
 export interface BareSexpBuilder {
   task(input: Partial<Task>): TaskBuilder;
+  minimal(): BareSexpBuilder;
+  full(): BareSexpBuilder;
+  compile(options?: CompileOptions): BareSexpResult;
+  getMetadata(taskId?: string): MetadataStore;
+  clearMetadata(): void;
 }
 
 export class TaskBuilder {
   private taskData: Task;
 
-  constructor(taskData: Partial<Task>) {
+  constructor(
+    taskData: Partial<Task>,
+    private compileContext: { mode: OutputMode; preserveMetadata: boolean; metadata: MetadataStore } = { mode: 'full', preserveMetadata: true, metadata: {} },
+  ) {
     this.taskData = {
       name: taskData.name ?? 'task',
       description: taskData.description,
@@ -56,8 +64,13 @@ export class TaskBuilder {
     return this.taskData;
   }
 
-  compile(): string {
-    return compileBareSexp(this.taskData);
+  compile(options?: CompileOptions): BareSexpResult {
+    const result = compileBareSexp(this.taskData, {
+      mode: options?.mode ?? this.compileContext.mode,
+      preserveMetadata: options?.preserveMetadata ?? this.compileContext.preserveMetadata,
+    });
+    Object.assign(this.compileContext.metadata, result.metadata);
+    return result;
   }
 }
 
@@ -65,6 +78,7 @@ export class StepBuilder {
   constructor(
     private taskData: Task,
     private stepData: Step,
+    private compileContext: { mode: OutputMode; preserveMetadata: boolean; metadata: MetadataStore } = { mode: 'full', preserveMetadata: true, metadata: {} },
   ) {}
 
   tool(input: Partial<Tool>): StepBuilder {
@@ -87,21 +101,55 @@ export class StepBuilder {
       output: input.output,
     };
     this.taskData.steps = [...(this.taskData.steps ?? []), step];
-    return new StepBuilder(this.taskData, step);
+    return new StepBuilder(this.taskData, step, this.compileContext);
   }
 
   build(): Task {
     return this.taskData;
   }
 
-  compile(): string {
-    return compileBareSexp(this.taskData);
+  compile(options?: CompileOptions): BareSexpResult {
+    const result = compileBareSexp(this.taskData, {
+      mode: options?.mode ?? this.compileContext.mode,
+      preserveMetadata: options?.preserveMetadata ?? this.compileContext.preserveMetadata,
+    });
+    Object.assign(this.compileContext.metadata, result.metadata);
+    return result;
   }
 }
 
 class BareSexpBuilderImpl implements BareSexpBuilder {
+  private mode: OutputMode = 'full';
+  private metadata: MetadataStore = {};
+
   task(input: Partial<Task>): TaskBuilder {
-    return new TaskBuilder(input);
+    return new TaskBuilder(input, { mode: this.mode, preserveMetadata: true, metadata: this.metadata });
+  }
+
+  minimal(): this {
+    this.mode = 'minimal';
+    return this;
+  }
+
+  full(): this {
+    this.mode = 'full';
+    return this;
+  }
+
+  compile(options?: CompileOptions): BareSexpResult {
+    const task = { name: 'task' } as Task;
+    return compileBareSexp(task, { ...options, mode: options?.mode ?? this.mode });
+  }
+
+  getMetadata(taskId?: string): MetadataStore {
+    if (taskId) {
+      return { [taskId]: this.metadata[taskId] ?? [] };
+    }
+    return this.metadata;
+  }
+
+  clearMetadata(): void {
+    this.metadata = {};
   }
 }
 

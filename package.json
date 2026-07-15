@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "npm run build && node --test tests/roundtrip.test.js",
+    "test": "npm run build && node --test tests/roundtrip.test.js tests/minimal-mode.test.js",
     "lint": "eslint src --ext .ts"
   },
   "keywords": ["ai", "llm", "agent", "prompt-engineering", "s-expression"],
