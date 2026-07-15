@@ -13,6 +13,14 @@ BareSexp is a minimal-token, lossless S-expression language plus a TypeScript to
 
 ## Getting started
 
+Install the published package:
+
+```bash
+npm install baresexp
+```
+
+If you are working from source locally:
+
 ```bash
 npm install
 npm run build
@@ -22,7 +30,7 @@ npm test
 ## Basic example
 
 ```ts
-import { builder, compileBareSexp } from './src/index.js';
+import { builder, compileBareSexp } from 'baresexp';
 
 const task = builder
   .task({ name: 'research-agent', description: 'Research and summarize' })
@@ -37,7 +45,7 @@ console.log(result.baresexp);
 ## Minimal mode example
 
 ```ts
-import { builder } from './src/index.js';
+import { builder } from 'baresexp';
 
 const result = builder
   .minimal()
@@ -69,7 +77,7 @@ const result = builder
     name: 'florida-man-news-summarizer',
     description: 'Summarize recent Florida Man news stories into a concise briefing',
   })
-  .compile({ mode: minimal,condense: true });
+  .compile({ mode: 'full', condense: true });
 
 console.log(result.baresexp);
 ```
