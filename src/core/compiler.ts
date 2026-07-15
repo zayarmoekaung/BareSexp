@@ -23,8 +23,9 @@ function formatValue(value: unknown, mode: CompileOptions['mode'] = 'full'): str
 export function compileBareSexp(task: Task, options?: CompileOptions): BareSexpResult {
   const mode = options?.mode ?? 'full';
   const preserveMetadata = options?.preserveMetadata ?? true;
+  const condense = options?.condense ?? false;
   const metadata: MetadataStore = {};
-  const indent = '  ';
+  const indent = condense ? '' : ' ';
   const lines: string[] = [`(task ${formatValue(task.name, mode)}`];
 
   if (task.description) {
@@ -35,7 +36,7 @@ export function compileBareSexp(task: Task, options?: CompileOptions): BareSexpR
   if (task.steps && task.steps.length > 0) {
     lines.push(`${indent}(steps`);
     for (const step of task.steps) {
-      lines.push(compileStep(step, 2, mode, metadata, preserveMetadata, task.name));
+      lines.push(compileStep(step,condense, condense ? 0 : 2, mode, metadata, preserveMetadata, task.name));
     }
     lines.push(`${indent})`);
   }
@@ -43,20 +44,19 @@ export function compileBareSexp(task: Task, options?: CompileOptions): BareSexpR
   if (task.tools && task.tools.length > 0) {
     lines.push(`${indent}(tools`);
     for (const tool of task.tools) {
-      lines.push(compileTool(tool, 2, mode, metadata, preserveMetadata, task.name));
+      lines.push(compileTool(tool,condense, condense ? 0 : 2, mode, metadata, preserveMetadata, task.name));
     }
     lines.push(`${indent})`);
   }
-
   lines.push(')');
-  const baresexp = lines.join('\n');
+  const baresexp = condense ? lines.join('') : lines.join('\n');
   const tokenCount = estimateTokenCount(baresexp);
   return { baresexp, metadata, tokenCount };
 }
 
-function compileStep(step: Step, indentLevel: number, mode: CompileOptions['mode'], metadata: MetadataStore, preserveMetadata: boolean, taskId: string): string {
-  const indent = '  '.repeat(indentLevel);
-  const childIndent = '  '.repeat(indentLevel + 1);
+function compileStep(step: Step,condense: boolean, indentLevel: number, mode: CompileOptions['mode'], metadata: MetadataStore, preserveMetadata: boolean, taskId: string): string {
+  const indent = condense ? '' : '  '.repeat(indentLevel);
+  const childIndent = condense ? '' : '  '.repeat(indentLevel + 1);
   const hasChildren = Boolean(step.description || step.tools?.length || step.input || step.output);
   const lines: string[] = [`${indent}(step ${formatValue(step.name, mode)}`];
 
@@ -67,7 +67,7 @@ function compileStep(step: Step, indentLevel: number, mode: CompileOptions['mode
   if (step.tools && step.tools.length > 0) {
     lines.push(`${childIndent}(tools`);
     for (const tool of step.tools) {
-      lines.push(compileTool(tool, indentLevel + 2, mode, metadata, preserveMetadata, taskId));
+      lines.push(compileTool(tool,condense, indentLevel + 2, mode, metadata, preserveMetadata, taskId));
     }
     lines.push(`${childIndent})`);
   }
@@ -81,12 +81,12 @@ function compileStep(step: Step, indentLevel: number, mode: CompileOptions['mode
     return `${indent}(step ${formatValue(step.name, mode)})`;
   }
   lines.push(`${indent})`);
-  return lines.join('\n');
+  return condense ? lines.join('') : lines.join('\n');
 }
 
-function compileTool(tool: Tool, indentLevel: number, mode: CompileOptions['mode'], metadata: MetadataStore, preserveMetadata: boolean, taskId: string): string {
-  const indent = '  '.repeat(indentLevel);
-  const childIndent = '  '.repeat(indentLevel + 1);
+function compileTool(tool: Tool,condense: boolean, indentLevel: number, mode: CompileOptions['mode'], metadata: MetadataStore, preserveMetadata: boolean, taskId: string): string {
+  const indent = condense ? '' : '  '.repeat(indentLevel);
+  const childIndent = condense ? '' : '  '.repeat(indentLevel + 1);
   const hasChildren = Boolean(tool.description || tool.input || tool.output);
   const lines: string[] = [`${indent}(tool ${formatValue(tool.name, mode)}`];
 
@@ -104,7 +104,7 @@ function compileTool(tool: Tool, indentLevel: number, mode: CompileOptions['mode
     return `${indent}(tool ${formatValue(tool.name, mode)})`;
   }
   lines.push(`${indent})`);
-  return lines.join('\n');
+  return condense ? lines.join('') : lines.join('\n');
 }
 
 function addMetadata(metadata: MetadataStore, taskId: string, fieldPath: string, original: unknown, mode: CompileOptions['mode'], preserveMetadata: boolean): MetadataEntry | undefined {

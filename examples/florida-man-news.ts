@@ -21,7 +21,7 @@ const task = builder
     name: 'summary-writer',
     description: 'Write a concise bulletin with key events and tone',
   })
-  .compile({ mode: 'minimal' });
+  .compile({ mode: 'minimal',condense: true });
 const fullTask = builder
   .task({
     name: 'florida-man-news-summarizer',
@@ -44,6 +44,7 @@ const fullTask = builder
     description: 'Write a concise bulletin with key events and tone',
   })
   .compile({ mode: 'full' });
+console.log('TASK MINIMAL', task);
 console.log('BARE SEXP', task.baresexp);
 console.log('TOKENS', task.tokenCount);
 console.log('BARE SEXP FULL', fullTask.baresexp);

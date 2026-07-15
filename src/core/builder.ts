@@ -68,6 +68,7 @@ export class TaskBuilder {
     const result = compileBareSexp(this.taskData, {
       mode: options?.mode ?? this.compileContext.mode,
       preserveMetadata: options?.preserveMetadata ?? this.compileContext.preserveMetadata,
+      condense: options?.condense ?? false,
     });
     Object.assign(this.compileContext.metadata, result.metadata);
     return result;
@@ -112,6 +113,7 @@ export class StepBuilder {
     const result = compileBareSexp(this.taskData, {
       mode: options?.mode ?? this.compileContext.mode,
       preserveMetadata: options?.preserveMetadata ?? this.compileContext.preserveMetadata,
+      condense: options?.condense ?? false,
     });
     Object.assign(this.compileContext.metadata, result.metadata);
     return result;

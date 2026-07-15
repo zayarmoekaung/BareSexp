@@ -4,6 +4,7 @@ export interface CompileOptions {
   mode?: OutputMode;
   indent?: boolean;
   preserveMetadata?: boolean;
+  condense?: boolean;
 }
 
 export interface MetadataEntry {
