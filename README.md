@@ -1,4 +1,5 @@
 # BareSexp
+[![npm version](https://img.shields.io/npm/v/baresexp.svg)](https://www.npmjs.com/package/baresexp)
 
 BareSexp is a minimal-token, lossless S-expression language plus a TypeScript toolchain for AI agent instructions.
 
