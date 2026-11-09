@@ -1,7 +1,8 @@
 # BareSexp
 [![npm version](https://img.shields.io/npm/v/baresexp.svg)](https://www.npmjs.com/package/baresexp)
+[![PyPI version](https://img.shields.io/pypi/v/baresexp.svg)](https://pypi.org/project/baresexp/)
 
-BareSexp is a minimal-token, lossless S-expression language plus a TypeScript toolchain for AI agent instructions.
+BareSexp is a minimal-token, lossless S-expression language plus a TypeScript + Python toolchain for AI agent instructions.
 
 ## Features
 
@@ -16,8 +17,16 @@ BareSexp is a minimal-token, lossless S-expression language plus a TypeScript to
 
 Install the published package:
 
+**TypeScript / Node.js**
+
 ```bash
 npm install baresexp
+```
+
+**Python**
+
+```bash
+pip install baresexp
 ```
 
 If you are working from source locally:
@@ -26,6 +35,11 @@ If you are working from source locally:
 npm install
 npm run build
 npm test
+
+# Python
+cd python
+pip install -e ".[dev]"
+pytest tests/ -v
 ```
 
 ## Basic example
@@ -132,10 +146,17 @@ This shows how the condense option can dramatically reduce payload size while re
 
 ## Examples
 
+**TypeScript**
+
 - [examples/research-agent.ts](examples/research-agent.ts)
 - [examples/tool-calling.ts](examples/tool-calling.ts)
 - [examples/florida-man-news.ts](examples/florida-man-news.ts)
 - [examples/minimal-research-agent.ts](examples/minimal-research-agent.ts)
+
+**Python**
+
+- [python/examples/research_agent.py](python/examples/research_agent.py)
+- [python/examples/minimal_research_agent.py](python/examples/minimal_research_agent.py)
 
 ## Verification
 
@@ -144,4 +165,21 @@ The project has been verified with:
 ```bash
 npm run build
 node examples/minimal-research-agent.ts
+
+# Python
+cd python && pytest tests/ -v
+python examples/minimal_research_agent.py
 ```
+
+## Python Package Release Notes
+
+### v1.0.0
+
+Initial Python release — feature-equivalent to the TypeScript implementation.
+
+- **Fluent builder API** — `builder.task(...).step(...).tool(...).compile()` with Pythonic keyword-only arguments
+- **Full and minimal modes** — minimal mode achieves ~14 tokens vs ~37 full for the research agent example, matching TypeScript compression ratio
+- **Round-trip support** — compile → parse → validate cycle preserves structure
+- **Condense option** — removes all whitespace for smallest possible payload
+- **Zero runtime dependencies** — pure stdlib Python ≥3.10
+- **Type hints throughout** — dataclasses with full type annotations

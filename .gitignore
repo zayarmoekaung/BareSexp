@@ -2,3 +2,12 @@ node_modules
 dist
 *.log
 .DS_Store
+
+# Python
+python/dist
+python/*.egg-info
+python/.eggs
+python/.pytest_cache
+python/__pycache__
+python/src/baresexp/__pycache__
+.env
