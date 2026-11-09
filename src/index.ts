@@ -1,6 +1,10 @@
 export * from './core/types.js';
 export { builder } from './core/builder.js';
 export { compileBareSexp } from './core/compiler.js';
-export { parseBareSexp } from './core/parser.js';
+export { parseBareSexp, parseContext } from './core/parser.js';
 export { validateBareSexp } from './core/validator.js';
 export { minimizeDescription, minimizeFieldName } from './core/minimizer.js';
+export { compileContext } from './core/context.js';
+export { reduceNaturalLanguage } from './core/grammar/index.js';
+export type { GrammarRule, ReduceOptions, ReduceResult, RuleCategory, RuleAction } from './core/grammar/index.js';
+export type { ContextBuilder, TaskBuilder as TaskBuilderType, StepBuilder as StepBuilderType } from './core/builder.js';

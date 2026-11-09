@@ -17,8 +17,23 @@ export interface MetadataStore {
   [taskId: string]: MetadataEntry[];
 }
 
+export interface Context {
+  name: string;
+  role?: string;
+  persona?: string;
+  background?: string;
+  domain?: string;
+  constraints?: string[];
+  facts?: string[];
+  scope?: string;
+  decision?: string;
+  data?: string;
+  metadata?: MetadataEntry[];
+}
+
 export interface BareSexpResult {
   baresexp: string;
+  contextSexp?: string;
   metadata: MetadataStore;
   tokenCount?: number;
 }
@@ -64,7 +79,8 @@ export interface Task {
 }
 
 export interface BareSexpDocument {
-  task: Task;
+  task?: Task;
+  context?: Context;
 }
 
-export type BareSexpNode = Task | Step | Tool | OutputSpec | Options;
+export type BareSexpNode = Task | Step | Tool | OutputSpec | Options | Context;

@@ -1,0 +1,259 @@
+[
+  {
+    "id": "pol-001",
+    "priority": 100,
+    "pattern": "\\b(?:could|would|can|may)\\s+(?:you\\s+)?(?:please\\s+)?",
+    "category": "politeness",
+    "action": "remove",
+    "example": { "before": "Could you please search", "after": "search" }
+  },
+  {
+    "id": "pol-002",
+    "priority": 99,
+    "pattern": "\\b(?:please|kindly|thank\\s*you|thanks|appreciate)\\b",
+    "category": "politeness",
+    "action": "remove"
+  },
+  {
+    "id": "pol-003",
+    "priority": 98,
+    "pattern": "\\b(?:I\\s+would\\s+like|I(?:'d)?\\s+like|I\\s+want|I\\s+need)\\s+",
+    "category": "politeness",
+    "action": "remove",
+    "example": { "before": "I would like to find", "after": "find" }
+  },
+  {
+    "id": "pol-004",
+    "priority": 97,
+    "pattern": "\\b(?:would\\s+you\\s+mind|do\\s+you\\s+think\\s+(?:you\\s+)?could)\\s+",
+    "category": "politeness",
+    "action": "remove"
+  },
+  {
+    "id": "pol-005",
+    "priority": 96,
+    "pattern": "\\b(?:it\\s+would\\s+be\\s+)?great\\s*(?:if|to)\\s+",
+    "category": "politeness",
+    "action": "remove"
+  },
+  {
+    "id": "art-001",
+    "priority": 70,
+    "pattern": "\\b(?:the|a|an)\\s+",
+    "category": "articles",
+    "action": "remove",
+    "example": { "before": "the best results", "after": "best results" }
+  },
+  {
+    "id": "art-002",
+    "priority": 65,
+    "pattern": "\\b(?:some|any|several|few|many|much)\\s+",
+    "category": "articles",
+    "action": "remove"
+  },
+  {
+    "id": "art-003",
+    "priority": 60,
+    "pattern": "\\b(?:this|that|these|those)\\s+",
+    "category": "articles",
+    "action": "remove"
+  },
+  {
+    "id": "aux-001",
+    "priority": 55,
+    "pattern": "\\b(?:is|are|was|were|am|be|been|being)\\s+",
+    "category": "auxiliaries",
+    "action": "remove",
+    "example": { "before": "is running fast", "after": "running fast" }
+  },
+  {
+    "id": "aux-002",
+    "priority": 54,
+    "pattern": "\\b(?:will|would|shall|should|can|could|may|might|must|ought\\s+to)\\s+",
+    "category": "auxiliaries",
+    "action": "remove"
+  },
+  {
+    "id": "aux-003",
+    "priority": 53,
+    "pattern": "\\b(?:have|has|had|having)\\s+",
+    "category": "auxiliaries",
+    "action": "remove"
+  },
+  {
+    "id": "aux-004",
+    "priority": 52,
+    "pattern": "\\b(?:do|does|did|done)\\s+",
+    "category": "auxiliaries",
+    "action": "remove"
+  },
+  {
+    "id": "fil-001",
+    "priority": 40,
+    "pattern": "\\b(?:just|simply|basically|actually|literally|really|very|quite|rather|somewhat)\\s*",
+    "category": "filler",
+    "action": "remove",
+    "example": { "before": "just find the best", "after": "find the best" }
+  },
+  {
+    "id": "fil-002",
+    "priority": 39,
+    "pattern": "\\b(?:I\\s+think|I\\s+believe|I\\s+feel|I\\s+guess|I\\s+suppose)\\s+",
+    "category": "filler",
+    "action": "remove"
+  },
+  {
+    "id": "fil-003",
+    "priority": 38,
+    "pattern": "\\b(?:sort\\s+of|kind\\s+of|type\\s+of)\\s+",
+    "category": "filler",
+    "action": "remove"
+  },
+  {
+    "id": "fil-004",
+    "priority": 37,
+    "pattern": "\\b(?:in\\s+order)\\s+",
+    "category": "filler",
+    "action": "remove",
+    "example": { "before": "in order to find", "after": "to find" }
+  },
+  {
+    "id": "fil-005",
+    "priority": 36,
+    "pattern": "\\b(?:for\\s+example|for\\s+instance|such\\s+as)\\s+",
+    "category": "filler",
+    "action": "replace",
+    "replacement": "e.g. "
+  },
+  {
+    "id": "fil-006",
+    "priority": 35,
+    "pattern": "\\b(?:etc|and\\s+so\\s+on|and\\s+the\\s+like)\\b\\.?",
+    "category": "filler",
+    "action": "remove"
+  },
+  {
+    "id": "con-001",
+    "priority": 25,
+    "pattern": "\\b(?:and\\s+also|and\\s+then|and\\s+moreover|and\\s+furthermore)\\s+",
+    "category": "conjunctions",
+    "action": "replace",
+    "replacement": "and "
+  },
+  {
+    "id": "con-002",
+    "priority": 24,
+    "pattern": "\\b(?:but|however|yet|nevertheless|nonetheless)\\s+",
+    "category": "conjunctions",
+    "action": "replace",
+    "replacement": "but "
+  },
+  {
+    "id": "con-003",
+    "priority": 23,
+    "pattern": "\\b(?:because|since|as|due\\s+to|owing\\s+to)\\s+",
+    "category": "conjunctions",
+    "action": "replace",
+    "replacement": "because "
+  },
+  {
+    "id": "con-004",
+    "priority": 22,
+    "pattern": "\\b(?:so|therefore|thus|hence|consequently)\\s+",
+    "category": "conjunctions",
+    "action": "replace",
+    "replacement": "so "
+  },
+  {
+    "id": "con-005",
+    "priority": 21,
+    "pattern": "\\b(?:if|unless|provided|assuming)\\s+",
+    "category": "conjunctions",
+    "action": "replace",
+    "replacement": "if "
+  },
+  {
+    "id": "con-006",
+    "priority": 20,
+    "pattern": "\\bwhich\\s+(?:is|are|was|were|has|have)\\s+",
+    "category": "relative-clauses",
+    "action": "remove",
+    "example": { "before": "data which is stored", "after": "data stored" }
+  },
+  {
+    "id": "con-007",
+    "priority": 19,
+    "pattern": "\\bthat\\s+(?:is|are|was|were)\\s+",
+    "category": "relative-clauses",
+    "action": "remove"
+  },
+  {
+    "id": "con-008",
+    "priority": 18,
+    "pattern": "\\bwho\\s+(?:is|are|was|were|has|have)\\s+",
+    "category": "relative-clauses",
+    "action": "remove"
+  },
+  {
+    "id": "vrb-001",
+    "priority": 15,
+    "pattern": "\\b(\\w+)ing\\b",
+    "category": "verb-form",
+    "action": "normalize"
+  },
+  {
+    "id": "vrb-002",
+    "priority": 14,
+    "pattern": "\\b(\\w+)(?:ed|tion|sion|ment)\\b",
+    "category": "verb-form",
+    "action": "normalize"
+  },
+  {
+    "id": "prp-001",
+    "priority": 10,
+    "pattern": "\\b(?:in\\s+terms\\s+of|with\\s+regard\\s+to|with\\s+respect\\s+to|concerning|regarding)\\s+",
+    "category": "prepositions",
+    "action": "replace",
+    "replacement": "about "
+  },
+  {
+    "id": "prp-002",
+    "priority": 9,
+    "pattern": "\\b(?:on\\s+top\\s+of|in\\s+addition\\s+to|besides|alongside)\\s+",
+    "category": "prepositions",
+    "action": "replace",
+    "replacement": "plus "
+  },
+  {
+    "id": "prp-003",
+    "priority": 8,
+    "pattern": "\\b(?:by\\s+means\\s+of|via|through|using)\\s+",
+    "category": "prepositions",
+    "action": "replace",
+    "replacement": "use "
+  },
+  {
+    "id": "agr-001",
+    "priority": 5,
+    "pattern": "\\b(?:the|a|an|my|your|his|her|its|our|their)\\s+",
+    "category": "pronouns",
+    "action": "remove",
+    "enabled": false
+  },
+  {
+    "id": "agr-002",
+    "priority": 4,
+    "pattern": "\\b(?:about|around|approximately|roughly)\\s+",
+    "category": "prepositions",
+    "action": "remove",
+    "enabled": false
+  },
+  {
+    "id": "agr-003",
+    "priority": 3,
+    "pattern": "\\b(?:make|do|perform|execute|conduct|carry\\s+out)\\s+",
+    "category": "structure",
+    "action": "remove",
+    "enabled": false
+  }
+]
