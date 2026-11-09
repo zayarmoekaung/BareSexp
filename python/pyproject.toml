@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "baresexp"
+version = "1.0.0"
+description = "Minimal token S-expression format AI agent instruction language"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [
+    { name = "Zayar Moe Kaung", email = "zayarmoekaung@gmail.com" },
+]
+keywords = ["ai", "llm", "agent", "prompt-engineering", "s-expression"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/zayarmoekaung/baresexp#readme"
+Repository = "https://github.com/zayarmoekaung/BareSexp.git"
+Issues = "https://github.com/zayarmoekaung/baresexp/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/baresexp"]
