@@ -83,11 +83,29 @@ class Task:
 
 
 @dataclass
+class Context:
+    """Context document — background, role, persona, constraints, facts, etc."""
+
+    name: str = "context"
+    role: str | None = None
+    persona: str | None = None
+    background: str | None = None
+    domain: str | None = None
+    constraints: list[str] = field(default_factory=list)
+    facts: list[str] = field(default_factory=list)
+    scope: str | None = None
+    decision: str | None = None
+    data: str | None = None
+    metadata: list[MetadataEntry] = field(default_factory=list)
+
+
+@dataclass
 class BareSexpResult:
-    """Result of compiling a task to BareSexp text."""
+    """Result of compiling a task or context to BareSexp text."""
 
     baresexp: str
     metadata: dict[str, list[MetadataEntry]]
+    context_sexp: str | None = None
     token_count: int = 0
 
 

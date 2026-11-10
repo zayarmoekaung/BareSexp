@@ -1,4 +1,4 @@
-import { Task, Step, Tool, OutputSpec, Options, BareSexpDocument } from './types.js';
+import { Task, Step, Tool, OutputSpec, Options, BareSexpDocument, Context } from './types.js';
 
 function tokenize(input: string): string[] {
   const tokens: string[] = [];
@@ -269,7 +269,89 @@ function parseOptions(parts: unknown[]): Options {
   return options;
 }
 
-export function parseBareSexp(input: string): BareSexpDocument | Task {
+function parseContextNode(parts: unknown[]): Context {
+  const ctx: Context = {
+    name: typeof parts[0] === 'string' ? parts[0] : 'context',
+  };
+
+  for (const child of parts.slice(1)) {
+    if (!Array.isArray(child)) {
+      continue;
+    }
+
+    const [key, ...body] = child as unknown[];
+    if (typeof key !== 'string') {
+      continue;
+    }
+
+    switch (key) {
+      case 'role':
+        ctx.role = parseScalar(body[0]) as string | undefined;
+        break;
+      case 'persona':
+        ctx.persona = parseScalar(body[0]) as string | undefined;
+        break;
+      case 'background':
+        ctx.background = parseScalar(body[0]) as string | undefined;
+        break;
+      case 'domain':
+        ctx.domain = parseScalar(body[0]) as string | undefined;
+        break;
+      case 'scope':
+        ctx.scope = parseScalar(body[0]) as string | undefined;
+        break;
+      case 'decision':
+        ctx.decision = parseScalar(body[0]) as string | undefined;
+        break;
+      case 'data':
+        ctx.data = parseScalar(body[0]) as string | undefined;
+        break;
+      case 'constraints':
+        ctx.constraints = (body as unknown[]).map((item) => {
+          if (Array.isArray(item)) {
+            const [cKey, ...cBody] = item as unknown[];
+            if (cKey === 'constraint') {
+              return parseScalar(cBody[0]) as string;
+            }
+          }
+          return parseScalar(item) as string;
+        }).filter(Boolean);
+        break;
+      case 'facts':
+        ctx.facts = (body as unknown[]).map((item) => {
+          if (Array.isArray(item)) {
+            const [fKey, ...fBody] = item as unknown[];
+            if (fKey === 'fact') {
+              return parseScalar(fBody[0]) as string;
+            }
+          }
+          return parseScalar(item) as string;
+        }).filter(Boolean);
+        break;
+    }
+  }
+
+  return ctx;
+}
+
+export function parseContext(input: string): Context {
+  const tokens = tokenize(input.trim());
+  if (tokens.length === 0) {
+    return { name: 'context' };
+  }
+
+  const parsed = parseExpression(tokens, 0);
+  if (Array.isArray(parsed.value)) {
+    const [head, ...body] = parsed.value as unknown[];
+    if (head === 'context') {
+      return parseContextNode(body);
+    }
+  }
+
+  return { name: 'context' };
+}
+
+export function parseBareSexp(input: string): BareSexpDocument | Task | Context {
   const tokens = tokenize(input.trim());
   if (tokens.length === 0) {
     return { name: 'task' } as Task;
@@ -280,6 +362,9 @@ export function parseBareSexp(input: string): BareSexpDocument | Task {
     const [head, ...body] = parsed.value as unknown[];
     if (head === 'task') {
       return parseTask(body);
+    }
+    if (head === 'context') {
+      return parseContextNode(body);
     }
   }
 

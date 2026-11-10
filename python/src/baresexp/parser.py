@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from .types import OutputSpec, Options, Step, Task, Tool
+from .types import Context, OutputSpec, Options, Step, Task, Tool
 
 
 def _tokenize(input_text: str) -> list[str]:
@@ -226,8 +226,69 @@ def _parse_options(parts: list[Any]) -> Options:
     return options
 
 
-def parse_baresexp(input_text: str) -> Task:
-    """Parse BareSexp text into a Task object."""
+def _parse_context(parts: list[Any]) -> Context:
+    ctx = Context(
+        name=parts[0] if isinstance(parts[0], str) else "context",
+    )
+
+    for child in parts[1:]:
+        if not isinstance(child, list):
+            continue
+
+        key = child[0] if child else None
+        body = child[1:]
+        if not isinstance(key, str):
+            continue
+
+        if key == "role":
+            ctx.role = _parse_scalar(body[0]) if body else None
+        elif key == "persona":
+            ctx.persona = _parse_scalar(body[0]) if body else None
+        elif key == "background":
+            ctx.background = _parse_scalar(body[0]) if body else None
+        elif key == "domain":
+            ctx.domain = _parse_scalar(body[0]) if body else None
+        elif key == "scope":
+            ctx.scope = _parse_scalar(body[0]) if body else None
+        elif key == "decision":
+            ctx.decision = _parse_scalar(body[0]) if body else None
+        elif key == "data":
+            ctx.data = _parse_scalar(body[0]) if body else None
+        elif key == "constraints":
+            ctx.constraints = [
+                _parse_scalar(item[1]) if isinstance(item, list) and item[0] == "constraint" else _parse_scalar(item)
+                for item in body
+                if isinstance(item, (list, str))
+            ]
+            ctx.constraints = [c for c in ctx.constraints if c]
+        elif key == "facts":
+            ctx.facts = [
+                _parse_scalar(item[1]) if isinstance(item, list) and item[0] == "fact" else _parse_scalar(item)
+                for item in body
+                if isinstance(item, (list, str))
+            ]
+            ctx.facts = [f for f in ctx.facts if f]
+
+    return ctx
+
+
+def parse_context(input_text: str) -> Context:
+    """Parse a context BareSexp expression into a Context object."""
+    tokens = _tokenize(input_text.strip())
+    if not tokens:
+        return Context()
+
+    parsed, _ = _parse_expression(tokens, 0)
+    if isinstance(parsed, list):
+        head, *body = parsed
+        if head == "context":
+            return _parse_context(body)
+
+    return Context()
+
+
+def parse_baresexp(input_text: str) -> Task | Context:
+    """Parse BareSexp text into a Task or Context object."""
     tokens = _tokenize(input_text.strip())
     if not tokens:
         return Task()
@@ -237,5 +298,7 @@ def parse_baresexp(input_text: str) -> Task:
         head, *body = parsed
         if head == "task":
             return _parse_task(body)
+        if head == "context":
+            return _parse_context(body)
 
     return Task()
