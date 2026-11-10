@@ -63,6 +63,16 @@ npx vitest run tests/grammar/reducer.test.ts
 cd python && pytest tests/grammar/test_reducer.py -v
 ```
 
+**Run context compiler tests only:**
+
+```bash
+# TypeScript
+npx vitest run tests/context.test.ts
+
+# Python
+cd python && pytest tests/test_context.py -v
+```
+
 **Run examples:**
 
 ```bash
@@ -448,8 +458,14 @@ node examples/natural-language-reducer.ts
 # TypeScript tests (requires vitest: npm install -D vitest)
 npx vitest run
 
+# TypeScript context tests
+npx vitest run tests/context.test.ts
+
 # Python tests
 cd python && pytest tests/ -v
+
+# Python context tests
+cd python && pytest tests/test_context.py -v
 
 # Python examples
 cd python && python examples/minimal_research_agent.py
@@ -469,3 +485,15 @@ Initial Python release — feature-equivalent to the TypeScript implementation.
 - **Grammar-based natural language reduction** — JSON grammar table strips human-oriented grammar before compilation for systematically compact output
 - **Zero runtime dependencies** — pure stdlib Python ≥3.10
 - **Type hints throughout** — dataclasses with full type annotations
+
+### v1.2.2
+
+Context compilation — sibling documents for agent background information.
+
+- **Context type** — `role`, `persona`, `background`, `domain`, `scope`, `decision`, `data`, `constraints[]`, `facts[]`
+- **Standalone or chained** — `.context().constraint().fact().task().step().compile()` from a single builder
+- **Grammar reduction** — all context string fields pass through the grammar reducer in minimal mode for systematic compaction
+- **Full prompt output** — chained compile returns `baresexp` as the concatenated `(context ...)\n(task ...)` ready to send as a single prompt; `contextSexp` / `context_sexp` available separately when needed
+- **Parser support** — `parseContext()` and `parseBareSexp()` recognize `(context ...)` top-level form
+- **Fluent builders** — `.role()`, `.persona()`, `.domain()`, `.constraint()`, `.fact()`, `.scope()`, `.decision()`, `.data()` chainable methods
+- **TypeScript + Python** — feature-equivalent implementations with matching APIs
