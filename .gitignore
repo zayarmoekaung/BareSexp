@@ -4,10 +4,10 @@ dist
 .DS_Store
 
 # Python
+**/__pycache__/
+**/*.pyc
 python/dist
 python/*.egg-info
 python/.eggs
 python/.pytest_cache
-python/__pycache__
-python/src/baresexp/__pycache__
 .env
