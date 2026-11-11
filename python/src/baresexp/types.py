@@ -75,6 +75,7 @@ class Task:
 
     name: str = "task"
     description: str | None = None
+    content: str | None = None
     steps: list[Step] = field(default_factory=list)
     tools: list[Tool] = field(default_factory=list)
     output: OutputSpec | None = None
@@ -107,6 +108,15 @@ class BareSexpResult:
     metadata: dict[str, list[MetadataEntry]]
     context_sexp: str | None = None
     token_count: int = 0
+
+
+@dataclass
+class BareSexpParts:
+    """Separate context and task compile outputs plus full concatenation."""
+
+    context: str
+    task: str
+    full: str
 
 
 MetadataStore = dict[str, list[MetadataEntry]]

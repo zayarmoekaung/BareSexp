@@ -71,6 +71,7 @@ export interface Options {
 export interface Task {
   name: string;
   description?: string;
+  content?: string;
   steps?: Step[];
   tools?: Tool[];
   output?: OutputSpec;
@@ -81,6 +82,12 @@ export interface Task {
 export interface BareSexpDocument {
   task?: Task;
   context?: Context;
+}
+
+export interface BareSexpParts {
+  context: string;
+  task: string;
+  full: string;
 }
 
 export type BareSexpNode = Task | Step | Tool | OutputSpec | Options | Context;

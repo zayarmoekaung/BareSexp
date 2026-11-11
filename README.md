@@ -1,4 +1,5 @@
 # BareSexp
+
 [![npm version](https://img.shields.io/npm/v/baresexp.svg)](https://www.npmjs.com/package/baresexp)
 [![PyPI version](https://img.shields.io/pypi/v/baresexp.svg)](https://pypi.org/project/baresexp/)
 
@@ -6,270 +7,176 @@ BareSexp is a minimal-token, lossless S-expression language plus a TypeScript + 
 
 ## Features
 
-- Fluent builder API for tasks, steps, tools, and **context documents**
-- Compiler that serializes typed objects into BareSexp text
+- **BareSexpDocument** — root container that holds context and task nodes; compile the whole document or each part separately
+- Fluent builder API for tasks, steps, tools, and context documents
+- Compiler that serializes typed objects into BareSexp text, with full and minimal modes
 - Parser that turns BareSexp text back into structured objects
 - Validator for basic task, step, and tool structure checks
-- Minimal mode with aggressive token reduction and local metadata storage
-- Grammar-based natural language reduction — strips human-oriented grammar before compilation to produce systematically compact BareSexp expressions
+- Grammar-based natural language reduction — strips human-oriented grammar before compilation for systematically compact output
+- `content` field on tasks for arbitrary user-provided data (CSV, JSON, code, queries)
 
-## Getting started
+## Quick start
 
-Install the published package:
-
-**TypeScript / Node.js**
+### Install
 
 ```bash
+# TypeScript / Node.js
 npm install baresexp
-```
 
-**Python**
-
-```bash
+# Python
 pip install baresexp
 ```
 
-If you are working from source locally:
-
-```bash
-# TypeScript
-npm install
-npm run build
-
-# Python
-cd python
-pip install -e ".[dev]"
-```
-
-## Testing
-
-**Run all tests:**
-
-```bash
-# TypeScript (requires vitest)
-npx vitest run
-
-# Python
-cd python && pytest tests/ -v
-```
-
-**Run grammar reducer tests only:**
-
-```bash
-# TypeScript
-npx vitest run tests/grammar/reducer.test.ts
-
-# Python
-cd python && pytest tests/grammar/test_reducer.py -v
-```
-
-**Run context compiler tests only:**
-
-```bash
-# TypeScript
-npx vitest run tests/context.test.ts
-
-# Python
-cd python && pytest tests/test_context.py -v
-```
-
-**Run examples:**
-
-```bash
-# TypeScript
-node examples/minimal-research-agent.ts
-node examples/natural-language-reducer.ts
-
-# Python
-cd python && python examples/minimal_research_agent.py
-cd python && python examples/natural_language_reducer.py
-```
-
-## Basic example
+### Basic example
 
 ```ts
-import { builder, compileBareSexp } from 'baresexp';
+import { builder } from 'baresexp';
 
-const task = builder
-  .task({ name: 'research-agent', description: 'Research and summarize' })
-  .step({ name: 'collect-context', description: 'Gather sources' })
+const result = builder
+  .minimal()
+  .task({ name: 'research', description: 'Research and summarize' })
+  .step({ name: 'collect', description: 'Gather sources' })
   .tool({ name: 'web-search', description: 'Search the web' })
-  .build();
-
-const result = compileBareSexp(task);
-console.log(result.baresexp);
-```
-
-## Minimal mode example
-
-```ts
-import { builder } from 'baresexp';
-
-const result = builder
-  .minimal()
-  .task({
-    name: 'research-agent',
-    description: 'Research and summarize the latest news about AI agents and tools for this week',
-  })
-  .step({
-    name: 'collect-context',
-    description: 'Gather recent sources and extract user-relevant facts',
-  })
   .compile({ mode: 'minimal' });
 
 console.log(result.baresexp);
-console.log(result.metadata);
-```
-
-## Prompt comparison
-
-A normal prompt is verbose and easy to read, while BareSexp is structured and compact. The condense option removes line breaks and extra whitespace so the same instruction can be emitted as a single compact token-efficient string.
-
-### Condense option
-
-Use `compile({ condense: true })` or the builder equivalent to remove line breaks from the generated output. This is useful when you want the smallest possible payload for an agent prompt while still keeping the original meaning intact in metadata.
-
-```ts
-const result = builder
-  .task({
-    name: 'florida-man-news-summarizer',
-    description: 'Summarize recent Florida Man news stories into a concise briefing',
-  })
-  .compile({ mode: 'full', condense: true });
-
-console.log(result.baresexp);
-```
-
-### Example: condensed BareSexp vs full BareSexp
-
-#### Raw prompt idea
-
-```text
-You are a Florida Man news summarizer. Summarize recent Florida Man news stories into a concise briefing.
-```
-
-#### Condensed BareSexp
-
-```text
-(task florida-man-news-summarizer(description summarize-florida-man-news-stories-conci)(steps(step collect-news(description gather-florida-man-headlines-source-link)(tools(tool web-search(description search-web-florida-man-news-stories))))(step summarize(description condense-stories-short-factual-summary)(tools(tool summary-writer(description write-concise-bulletin-key-events-tone))))))
-```
-
-#### Full BareSexp
-
-```text
-(task florida-man-news-summarizer
- (description "Summarize recent Florida Man news stories into a concise briefing")
- (steps
-    (step collect-news
-      (description "Gather recent Florida Man headlines and source links")
-      (tools
-        (tool web-search
-          (description "Search the web for recent Florida Man news stories")
-        )
-      )
-    )
-    (step summarize
-      (description "Condense the stories into a short, factual summary")
-      (tools
-        (tool summary-writer
-          (description "Write a concise bulletin with key events and tone")
-        )
-      )
-    )
- )
-)
-```
-
-### Token comparison
-
-- Condensed BareSexp: about 14 tokens
-- Full BareSexp: about 84 tokens
-
-This shows how the condense option can dramatically reduce payload size while remaining structurally clear for the agent.
-
-## Context documents
-
-BareSexp supports **context documents** as sibling expressions to tasks. Context carries the background information an agent needs before acting — role, persona, domain knowledge, constraints, facts, decision criteria, and data snippets.
-
-Context can be compiled **standalone** or **chained** with a task from the same builder:
-
-```ts
-import { builder } from 'baresexp';
-
-// Chained: context + task in one compile
-const result = builder
-  .minimal()
-  .context({
-    name: 'ai-reviewer',
-    role: 'You are a senior TypeScript engineer reviewing code',
-    domain: 'AI agent frameworks',
-  })
-  .constraint('Keep descriptions under 120 chars')
-  .fact('Zero runtime dependencies')
-  .task({
-    name: 'review',
-    description: 'Review the code for correctness and type safety',
-  })
-  .step({ name: 'check', description: 'Check types and lint' })
-  .compile({ mode: 'minimal' });
-
-console.log(result.baresexp);      // full prompt: (context ...) + (task ...)
-console.log(result.contextSexp);   // context part only, if needed separately
 ```
 
 ```python
 from baresexp import builder
 
-# Chained: context + task in one compile
 result = (
     builder
     .minimal()
-    .context(
-        name="ai-reviewer",
-        role="You are a senior Python engineer reviewing code",
-        domain="AI agent frameworks",
-    )
-    .constraint("Keep descriptions under 120 chars")
-    .fact("Zero runtime dependencies")
-    .task(
-        name="review",
-        description="Review the code for correctness and type safety",
-    )
-    .step(name="check", description="Check types and lint")
+    .task(name="research", description="Research and summarize")
+    .step(name="collect", description="Gather sources")
+    .tool(name="web-search", description="Search the web")
     .compile(mode="minimal")
 )
 
-print(result.baresexp)        # full prompt: (context ...) + (task ...)
-print(result.context_sexp)    # context part only, if needed separately
+print(result.baresexp)
 ```
 
-### Context S-expression shape
+## Document API
+
+The **BareSexpDocument** is the root container. Context and task nodes chain off it, and you can compile the whole document or each part independently — nothing gets consumed or reset.
+
+```ts
+import { BareSexpDocument } from 'baresexp';
+
+const doc = new BareSexpDocument()
+  .minimal()
+  .context({
+    name: 'reviewer',
+    role: 'You are a senior code reviewer',
+    domain: 'TypeScript',
+  })
+  .constraint('Keep comments under 80 chars')
+  .task({
+    name: 'review',
+    description: 'Review the code for correctness and type safety',
+    content: 'function add(a: number, b: number) { return a + b; }',
+  })
+  .step({ name: 'check', description: 'Check types and lint' });
+```
+
+### Compile methods
+
+| Method | Returns | Use when |
+|---|---|---|
+| `doc.compile()` | `BareSexpResult` | You want the full document as one string |
+| `doc.compileContext()` | `BareSexpResult` | You need just the context part |
+| `doc.compileTask()` | `BareSexpResult` | You need just the task part |
+| `doc.compileParts()` | `BareSexpParts` | You need context and task as separate strings |
+
+```ts
+const parts = doc.compileParts();
+
+parts.context  // "(context reviewer ...)"
+parts.task     // "(task review ...)"
+parts.full     // "(context ...)\n(task ...)"
+
+// Send to your app however you want — BareSexp doesn't care about roles:
+await llm.chat([
+  { role: 'system', content: parts.context },
+  { role: 'user',   content: parts.task },
+]);
+```
+
+```python
+from baresexp import BareSexpDocument
+
+doc = (
+    BareSexpDocument()
+    .minimal()
+    .context(name="reviewer", role="You are a senior code reviewer")
+    .constraint("Keep comments under 80 chars")
+    .task(name="review", description="Review the code", content="...")
+)
+
+parts = doc.compile_parts()
+parts.context  # "(context reviewer ...)"
+parts.task     # "(task review ...)"
+parts.full     # "(context ...)\n(task ...)"
+```
+
+## Task content field
+
+Tasks have a `content` field for arbitrary user-provided data — CSV, JSON, code snippets, user queries, or any payload the agent needs to process.
+
+```ts
+const doc = new BareSexpDocument()
+  .minimal()
+  .task({
+    name: 'analyze',
+    description: 'Process the CSV data and return a summary',
+    content: 'name,age,city\nAlice,30,NYC\nBob,25,LA',
+  });
+```
 
 ```lisp
-(context ai-reviewer
-  (role you-senior-typescript-engineer-reviewing-code)
-  (domain ai-agent-frameworks)
-  (constraints
-    (constraint keep-descriptions-under-120-chars)
-  )
-  (facts
-    (fact zero-runtime-dependencies)
-  )
-)
-(task review
-  (description review-code-correctness-type-safety)
-  (steps
-    (step check
-      (description check-types-lint)
-    )
-  )
+(task analyze
+  (description "Process the CSV data and return a summary")
+  (content "name,age,city
+Alice,30,NYC
+Bob,25,LA")
 )
 ```
+
+## Output modes
+
+| Mode | Description |
+|---|---|
+| `full` | Verbose, human-readable S-expressions with full descriptions |
+| `minimal` | Aggressively compact — strips stop words, kebab-cases identifiers, applies grammar reduction |
+
+```ts
+// Full mode — readable
+const full = builder.task({ name: 'research', description: 'Research AI tools' }).compile({ mode: 'full' });
+
+// Minimal mode — compact
+const minimal = builder.minimal().task({ name: 'research', description: 'Research AI tools' }).compile({ mode: 'minimal' });
+
+// Condense — removes all whitespace for smallest payload
+const compact = builder.minimal().task({ name: 'research', description: 'Research AI tools' }).compile({ mode: 'minimal', condense: true });
+```
+
+### Token comparison
+
+| Format | Tokens |
+|---|---|
+| Full | ~84 |
+| Minimal | ~14 |
+| Condensed | ~14 (single line) |
+
+## Context documents
+
+Context carries background information an agent needs — role, persona, domain knowledge, constraints, facts, decision criteria.
 
 ### Context fields
 
 | Field | Purpose |
-|-------|---------|
+|---|---|
 | `name` | Required identifier |
 | `role` | "You are a ..." persona assignment |
 | `persona` | Communication style, tone |
@@ -281,11 +188,32 @@ print(result.context_sexp)    # context part only, if needed separately
 | `facts` | Array of key facts / data points |
 | `data` | Raw data snippets, logs, samples |
 
-All string fields pass through the **grammar reducer** in minimal mode for systematic compaction.
+All string fields pass through the grammar reducer in minimal mode.
+
+### S-expression shape
+
+```lisp
+(context ai-reviewer
+  (role you-senior-engineer-reviewing-code)
+  (domain ai-agent-frameworks)
+  (constraints
+    (constraint keep-comments-under-80-chars)
+  )
+  (facts
+    (fact zero-runtime-dependencies)
+  )
+)
+(task review
+  (description review-code-correctness)
+  (steps
+    (step check
+      (description check-types-lint)
+    )
+  )
+)
+```
 
 ### Parser support
-
-**TypeScript**
 
 ```ts
 import { parseContext, parseBareSexp } from 'baresexp';
@@ -294,8 +222,6 @@ const ctx = parseContext('(context my-ctx (role tester))');
 const doc = parseBareSexp('(context ...) (task ...)');
 ```
 
-**Python**
-
 ```python
 from baresexp import parse_context, parse_baresexp
 
@@ -303,133 +229,66 @@ ctx = parse_context("(context my-ctx (role tester))")
 doc = parse_baresexp("(context ...) (task ...)")
 ```
 
-## From natural language to compact BareSexp
+## Natural language reduction
 
-BareSexp includes a **grammar-based natural language reducer** that sits before compilation. It applies a JSON-based grammar table to strip politeness, articles, fillers, auxiliaries, and normalize verb forms — producing simplified descriptions that the compiler then turns into systematically shorter BareSexp expressions.
-
-The pipeline is:
+BareSexp includes a grammar-based reducer that strips politeness, articles, fillers, auxiliaries, and normalizes verb forms — producing simplified text that compiles into shorter S-expressions.
 
 ```
 Natural language → Grammar reducer → Simplified text → BareSexp compiler → Compact S-expression
 ```
 
-### How it works
+### Grammar layers (applied by priority)
 
-The reducer applies rules in priority order across 6 layers:
-
-1. **Politeness & tone** — remove "could you please", "I would like", etc.
-2. **Articles & determiners** — strip "the", "a", "some", "this", etc.
-3. **Auxiliary & modal verbs** — remove "is", "will", "should", "have", etc.
-4. **Filler & redundant phrases** — strip "just", "basically", "I think", "in order to", etc.
-5. **Conjunctions & relative clauses** — simplify "and also", "which is", etc.
-6. **Verb normalization** — reduce "-ing" forms and suffixes to base form
+1. **Politeness & tone** — "could you please", "I would like"
+2. **Articles & determiners** — "the", "a", "some", "this"
+3. **Auxiliary & modal verbs** — "is", "will", "should", "have"
+4. **Filler & redundant phrases** — "just", "basically", "in order to"
+5. **Conjunctions & relative clauses** — "and also", "which is"
+6. **Verb normalization** — "-ing" and suffix forms to base verb
 
 ### Usage
 
 ```ts
-import { reduceNaturalLanguage, builder } from 'baresexp';
+import { reduceNaturalLanguage } from 'baresexp';
 
-// Step 1: Reduce natural language
 const reduced = reduceNaturalLanguage(
   'Could you please search the web for the latest news about AI agents'
 );
 // reduced.simplified → "Search web latest news AI agents"
-
-// Step 2: Feed into BareSexp builder
-const task = builder
-  .minimal()
-  .task({ name: 'research-agent', description: reduced.simplified })
-  .step({ name: 'collect', description: reduced.simplified })
-  .compile({ mode: 'minimal' });
-
-console.log(task.baresexp);
 ```
 
 ```python
-from baresexp import reduce_natural_language, builder
+from baresexp import reduce_natural_language
 
-# Step 1: Reduce natural language
 reduced = reduce_natural_language(
     "Could you please search the web for the latest news about AI agents"
 )
 # reduced.simplified → "Search web latest news AI agents"
-
-# Step 2: Feed into BareSexp builder
-task = (
-    builder
-    .minimal()
-    .task(name="research-agent", description=reduced.simplified)
-    .step(name="collect", description=reduced.simplified)
-    .compile(mode="minimal")
-)
-
-print(task.baresexp)
 ```
-
-### Token savings from grammar reduction
-
-| Input description | After reduction | BareSexp tokens |
-|-------------------|-----------------|-----------------|
-| `Could you please search the web for the latest news about Florida man` | `Search web latest news Florida man` | ~10 |
-| `I think it would be great if you could basically just run the analysis` | `Run analysis` | ~4 |
-| `I would like to find the best results for my query in order to understand the data` | `Find best results query understand data` | ~12 |
 
 ### Options
 
 ```ts
-// Keep politeness but strip everything else
-reduceNaturalLanguage(text, { keepPoliteness: true });
-
-// Aggressive mode: extra stripping of pronouns, approximations, action verbs
-reduceNaturalLanguage(text, { aggressive: true });
-
-// Convert simplified text directly to BareSexp (skips manual builder step)
-reduceNaturalLanguage(text, { toBareSexp: true });
+reduceNaturalLanguage(text, { keepPoliteness: true });   // keep polite phrases
+reduceNaturalLanguage(text, { aggressive: true });        // extra stripping
+reduceNaturalLanguage(text, { toBareSexp: true });        // direct to S-expression
 ```
 
-```python
-reduce_natural_language(text, options=ReduceOptions(keep_politeness=True))
-reduce_natural_language(text, options=ReduceOptions(aggressive=True))
-reduce_natural_language(text, options=ReduceOptions(to_baresexp=True))
-```
-
-### Custom grammar rules
-
-Rules are defined in `default-rules.json` (34 rules, zero runtime deps). You can load your own rule set for domain-specific language:
+### Custom rules
 
 ```ts
 import { reduceNaturalLanguage, loadRulesFromJson } from 'baresexp';
-import { readFileSync } from 'fs';
 
-const myRules = loadRulesFromJson(readFileSync('./my-rules.json', 'utf8'));
-const reduced = reduceNaturalLanguage(text, {}, myRules);
+const myRules = loadRulesFromJson('...');
+reduceNaturalLanguage(text, {}, myRules);
 ```
 
-```python
-from baresexp import reduce_natural_language, load_rules_from_json
+### Token savings
 
-with open("my-rules.json") as f:
-    my_rules = load_rules_from_json(f.read())
-
-reduced = reduce_natural_language(text, custom_rules=my_rules)
-```
-
-Each rule in the JSON file follows this shape:
-
-```json
-{
-  "id": "pol-001",
-  "priority": 100,
-  "pattern": "\\b(?:could|would|can|may)\\s+(?:you\\s+)?(?:please\\s+)?",
-  "category": "politeness",
-  "action": "remove",
-  "example": { "before": "Could you please search", "after": "search" }
-}
-```
-
-- **`priority`**: Higher = applied earlier
-- **`action`**: `remove`, `replace`, or `normalize`
-- **`category`**: `politeness`, `articles`, `auxiliaries`, `filler`, `conjunctions`, `relative-clauses`, `verb-form`, `prepositions`, `pronouns`, `structure`
+| Input | After reduction | Tokens |
+|---|---|---|
+| `Could you please search the web for the latest news about Florida man` | `Search web latest news Florida man` | ~10 |
+| `I think it would be great if you could basically just run the analysis` | `Run analysis` | ~4 |
 
 ## Examples
 
@@ -447,44 +306,28 @@ Each rule in the JSON file follows this shape:
 - [python/examples/minimal_research_agent.py](python/examples/minimal_research_agent.py)
 - [python/examples/natural_language_reducer.py](python/examples/natural_language_reducer.py)
 
-## Verification
+## Testing
 
 ```bash
-# TypeScript build + examples
-npm run build
-node examples/minimal-research-agent.ts
-node examples/natural-language-reducer.ts
-
-# TypeScript tests (requires vitest: npm install -D vitest)
+# TypeScript (requires vitest: npm install -D vitest)
 npx vitest run
 
-# TypeScript context tests
-npx vitest run tests/context.test.ts
-
-# Python tests
+# Python
 cd python && pytest tests/ -v
-
-# Python context tests
-cd python && pytest tests/test_context.py -v
-
-# Python examples
-cd python && python examples/minimal_research_agent.py
-cd python && python examples/natural_language_reducer.py
 ```
 
-## Python Package Release Notes
+## Release notes
 
-### v1.0.0
+### v1.3.0
 
-Initial Python release — feature-equivalent to the TypeScript implementation.
+BareSexpDocument root container, separate context/task compilation, and task content field.
 
-- **Fluent builder API** — `builder.task(...).step(...).tool(...).compile()` with Pythonic keyword-only arguments
-- **Full and minimal modes** — minimal mode achieves ~14 tokens vs ~37 full for the research agent example, matching TypeScript compression ratio
-- **Round-trip support** — compile → parse → validate cycle preserves structure
-- **Condense option** — removes all whitespace for smallest possible payload
-- **Grammar-based natural language reduction** — JSON grammar table strips human-oriented grammar before compilation for systematically compact output
-- **Zero runtime dependencies** — pure stdlib Python ≥3.10
-- **Type hints throughout** — dataclasses with full type annotations
+- **BareSexpDocument** — new root container class that holds contexts and tasks as arrays; nothing gets consumed or reset, so any compile method works at any time
+- **Separate compile methods** — `compile()`, `compileContext()`, `compileTask()`, `compileParts()` on both `BareSexpDocument` and the builder's document accessor; returns `{ context, task, full }` without importing LLM role vocabulary
+- **Task content field** — `content` on `Task` for arbitrary user data (CSV, JSON, code, queries); compiled as `(content "...")` in the S-expression; parsed and round-tripped
+- **Parser support** — `parseBareSexp()` and `parse_baresexp()` recognize `(content ...)` inside task expressions
+- **builder.document()** — get a `BareSexpDocument` from the existing builder for gradual migration
+- **TypeScript + Python** — feature-equivalent implementations with matching APIs and types
 
 ### v1.2.2
 
@@ -492,8 +335,18 @@ Context compilation — sibling documents for agent background information.
 
 - **Context type** — `role`, `persona`, `background`, `domain`, `scope`, `decision`, `data`, `constraints[]`, `facts[]`
 - **Standalone or chained** — `.context().constraint().fact().task().step().compile()` from a single builder
-- **Grammar reduction** — all context string fields pass through the grammar reducer in minimal mode for systematic compaction
-- **Full prompt output** — chained compile returns `baresexp` as the concatenated `(context ...)\n(task ...)` ready to send as a single prompt; `contextSexp` / `context_sexp` available separately when needed
+- **Grammar reduction** — all context string fields pass through the grammar reducer in minimal mode
+- **Full prompt output** — chained compile returns `baresexp` as concatenated `(context ...)\n(task ...)`; `contextSexp` / `context_sexp` available separately
 - **Parser support** — `parseContext()` and `parseBareSexp()` recognize `(context ...)` top-level form
-- **Fluent builders** — `.role()`, `.persona()`, `.domain()`, `.constraint()`, `.fact()`, `.scope()`, `.decision()`, `.data()` chainable methods
-- **TypeScript + Python** — feature-equivalent implementations with matching APIs
+- **TypeScript + Python** — feature-equivalent implementations
+
+### v1.0.0
+
+Initial Python release — feature-equivalent to the TypeScript implementation.
+
+- **Fluent builder API** — `builder.task(...).step(...).tool(...).compile()` with Pythonic keyword-only arguments
+- **Full and minimal modes** — minimal mode achieves ~14 tokens vs ~37 full for the research agent
+- **Round-trip support** — compile → parse → validate cycle preserves structure
+- **Condense option** — removes all whitespace for smallest possible payload
+- **Grammar-based natural language reduction** — JSON grammar table strips human-oriented grammar
+- **Zero runtime dependencies** — pure stdlib Python ≥3.10
