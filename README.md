@@ -318,7 +318,7 @@ cd python && pytest tests/ -v
 
 ## Release notes
 
-### v1.2.3
+### v1.3.0
 
 BareSexpDocument root container, separate context/task compilation, and task content field.
 
