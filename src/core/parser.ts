@@ -114,6 +114,9 @@ function parseTask(parts: unknown[]): Task {
       case 'description':
         task.description = parseScalar(body[0]) as string | undefined;
         break;
+      case 'content':
+        task.content = parseScalar(body[0]) as string | undefined;
+        break;
       case 'steps':
         task.steps = (body as unknown[]).map((item) => parseStep(item));
         break;

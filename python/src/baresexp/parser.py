@@ -103,6 +103,8 @@ def _parse_task(parts: list[Any]) -> Task:
 
         if key == "description":
             task.description = _parse_scalar(body[0]) if body else None
+        elif key == "content":
+            task.content = _parse_scalar(body[0]) if body else None
         elif key == "steps":
             task.steps = [_parse_step(item) for item in body if isinstance(item, list)]
         elif key == "tools":

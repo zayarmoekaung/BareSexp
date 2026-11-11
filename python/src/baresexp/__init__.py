@@ -3,6 +3,7 @@
 from .builder import BareSexpBuilder, builder
 from .compiler import compile_baresexp
 from .context import compile_context
+from .document import BareSexpDocument
 from .grammar import reduce_natural_language
 from .grammar.types import (
     GrammarRule,
@@ -15,6 +16,7 @@ from .grammar.types import (
 from .minimizer import minimize_description, minimize_field_name
 from .parser import parse_baresexp, parse_context
 from .types import (
+    BareSexpParts,
     BareSexpResult,
     CompileOptions,
     Context,
@@ -30,6 +32,8 @@ from .validator import validate_baresexp
 
 __all__ = [
     "BareSexpBuilder",
+    "BareSexpDocument",
+    "BareSexpParts",
     "BareSexpResult",
     "CompileOptions",
     "Context",

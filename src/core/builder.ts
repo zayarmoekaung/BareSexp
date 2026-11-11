@@ -1,10 +1,12 @@
-import { Task, Step, Tool, OutputSpec, Options, CompileOptions, BareSexpResult, MetadataStore, OutputMode, Context } from './types.js';
+import { Task, Step, Tool, OutputSpec, Options, CompileOptions, BareSexpResult, BareSexpParts, MetadataStore, OutputMode, Context } from './types.js';
 import { compileBareSexp } from './compiler.js';
 import { compileContext } from './context.js';
+import { BareSexpDocument } from './document.js';
 
 export interface BareSexpBuilder {
   task(input: Partial<Task>): TaskBuilder;
   context(input: Partial<Context>): ContextBuilder;
+  document(): BareSexpDocument;
   minimal(): BareSexpBuilder;
   full(): BareSexpBuilder;
   compile(options?: CompileOptions): BareSexpResult;
@@ -265,6 +267,10 @@ class BareSexpBuilderImpl implements BareSexpBuilder {
   private mode: OutputMode = 'full';
   private metadata: MetadataStore = {};
   contextData: Context | null = null;
+
+  document(): BareSexpDocument {
+    return new BareSexpDocument();
+  }
 
   task(input: Partial<Task>): TaskBuilder {
     const ctxData = this.contextData;

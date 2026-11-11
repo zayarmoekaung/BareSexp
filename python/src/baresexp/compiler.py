@@ -52,6 +52,10 @@ def compile_baresexp(
         _add_metadata(metadata, task.name, "description", task.description, mode, preserve_metadata)
         lines.append(f"{indent}(description {_format_value(task.description, mode)})")
 
+    if task.content:
+        _add_metadata(metadata, task.name, "content", task.content, mode, preserve_metadata)
+        lines.append(f"{indent}(content {_format_value(task.content, mode)})")
+
     if task.steps:
         lines.append(f"{indent}(steps")
         for step in task.steps:

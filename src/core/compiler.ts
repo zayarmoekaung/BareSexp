@@ -33,6 +33,11 @@ export function compileBareSexp(task: Task, options?: CompileOptions): BareSexpR
     lines.push(`${indent}(description ${formatValue(task.description, mode)})`);
   }
 
+  if (task.content) {
+    addMetadata(metadata, task.name, 'content', task.content, mode, preserveMetadata);
+    lines.push(`${indent}(content ${formatValue(task.content, mode)})`);
+  }
+
   if (task.steps && task.steps.length > 0) {
     lines.push(`${indent}(steps`);
     for (const step of task.steps) {
