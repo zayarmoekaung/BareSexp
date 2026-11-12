@@ -1,6 +1,7 @@
 export * from './core/types.js';
 export { builder } from './core/builder.js';
 export { compileBareSexp } from './core/compiler.js';
+export { compileJson, parseJson } from './core/json-compiler.js';
 export { parseBareSexp, parseContext } from './core/parser.js';
 export { validateBareSexp } from './core/validator.js';
 export { minimizeDescription, minimizeFieldName } from './core/minimizer.js';
