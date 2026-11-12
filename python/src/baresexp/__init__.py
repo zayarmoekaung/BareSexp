@@ -13,6 +13,7 @@ from .grammar.types import (
     RuleAction,
     RuleCategory,
 )
+from .json_compiler import compile_json, parse_json
 from .minimizer import minimize_description, minimize_field_name
 from .parser import parse_baresexp, parse_context
 from .types import (
@@ -53,6 +54,8 @@ __all__ = [
     "builder",
     "compile_baresexp",
     "compile_context",
+    "compile_json",
+    "parse_json",
     "minimize_description",
     "minimize_field_name",
     "parse_baresexp",

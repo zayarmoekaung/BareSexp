@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from .compiler import compile_baresexp
 from .context import compile_context
+from .json_compiler import compile_json
 from .types import (
     BareSexpResult,
     Context,
@@ -83,6 +86,17 @@ class _StepBuilder:
             data=data,
         )
         return _ContextBuilder(ctx, self._mode)
+
+    def json_payload(
+        self,
+        data: dict[str, Any],
+        *,
+        condense: bool = False,
+    ) -> _StepBuilder:
+        """Compile a JSON dict into a BareSexp s-expression and set as task content."""
+        sexp = compile_json(data, mode=self._mode, condense=condense)
+        self._task_data.content = sexp
+        return self
 
     def build(self) -> Task:
         return self._task_data
@@ -182,6 +196,17 @@ class _TaskBuilder:
         self._task_data.options = Options(
             strict=strict, indent=indent, include_metadata=include_metadata
         )
+        return self
+
+    def json_payload(
+        self,
+        data: dict[str, Any],
+        *,
+        condense: bool = False,
+    ) -> _TaskBuilder:
+        """Compile a JSON dict into a BareSexp s-expression and set as task content."""
+        sexp = compile_json(data, mode=self._mode, condense=condense)
+        self._task_data.content = sexp
         return self
 
     def context(

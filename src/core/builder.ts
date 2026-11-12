@@ -2,6 +2,7 @@ import { Task, Step, Tool, OutputSpec, Options, CompileOptions, BareSexpResult, 
 import { compileBareSexp } from './compiler.js';
 import { compileContext } from './context.js';
 import { BareSexpDocument } from './document.js';
+import { compileJson } from './json-compiler.js';
 
 export interface BareSexpBuilder {
   task(input: Partial<Task>): TaskBuilder;
@@ -64,6 +65,13 @@ export class TaskBuilder {
 
   options(input: Partial<Options>): TaskBuilder {
     this.taskData.options = { ...this.taskData.options, ...input };
+    return this;
+  }
+
+  /** Compile a JSON object into a BareSexp s-expression and set it as the task's content. */
+  jsonPayload(input: Record<string, unknown>, condense?: boolean): TaskBuilder {
+    const sexp = compileJson(input, { mode: this.compileContext.mode, condense: condense ?? false });
+    this.taskData.content = sexp;
     return this;
   }
 
@@ -136,6 +144,13 @@ export class StepBuilder {
 
   context(input: Partial<Context>): ContextBuilder {
     return new ContextBuilder(input, this.compileContext);
+  }
+
+  /** Compile a JSON object into a BareSexp s-expression and set it as the task's content. */
+  jsonPayload(input: Record<string, unknown>, condense?: boolean): StepBuilder {
+    const sexp = compileJson(input, { mode: this.compileContext.mode, condense: condense ?? false });
+    this.taskData.content = sexp;
+    return this;
   }
 
   build(): Task {

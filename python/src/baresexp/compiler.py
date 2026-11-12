@@ -22,10 +22,10 @@ def _escape_token(value: str) -> str:
     return value.replace("\\", "\\\\").replace('"', '\\"')
 
 
-def _format_value(value: Any, mode: OutputMode = "full") -> str:
+def _format_value(value: Any, mode: OutputMode = "full", minimize: bool = True) -> str:
     if isinstance(value, str):
         normalized = value.strip()
-        effective = minimize_description(normalized) if mode == "minimal" else normalized
+        effective = minimize_description(normalized) if (minimize and mode == "minimal") else normalized
         if not effective or re.search(r'[\s()"\']', effective, re.UNICODE):
             return f'"{_escape_token(effective)}"'
         return effective
@@ -54,7 +54,7 @@ def compile_baresexp(
 
     if task.content:
         _add_metadata(metadata, task.name, "content", task.content, mode, preserve_metadata)
-        lines.append(f"{indent}(content {_format_value(task.content, mode)})")
+        lines.append(f"{indent}(content {_format_value(task.content, mode, minimize=False)})")
 
     if task.steps:
         lines.append(f"{indent}(steps")

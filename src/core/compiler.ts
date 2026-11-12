@@ -5,10 +5,10 @@ function escapeToken(value: string): string {
   return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
-function formatValue(value: unknown, mode: CompileOptions['mode'] = 'full'): string {
+function formatValue(value: unknown, mode: CompileOptions['mode'] = 'full', minimize = true): string {
   if (typeof value === 'string') {
     const normalized = value.trim();
-    const effective = mode === 'minimal' ? minimizeDescription(normalized) : normalized;
+    const effective = minimize && mode === 'minimal' ? minimizeDescription(normalized) : normalized;
     if (effective === '' || /[\s()"']/u.test(effective)) {
       return `"${escapeToken(effective)}"`;
     }
@@ -35,7 +35,7 @@ export function compileBareSexp(task: Task, options?: CompileOptions): BareSexpR
 
   if (task.content) {
     addMetadata(metadata, task.name, 'content', task.content, mode, preserveMetadata);
-    lines.push(`${indent}(content ${formatValue(task.content, mode)})`);
+    lines.push(`${indent}(content ${formatValue(task.content, mode, false)})`);
   }
 
   if (task.steps && task.steps.length > 0) {

@@ -2,8 +2,13 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from .compiler import compile_baresexp
 from .context import compile_context
+from .json_compiler import compile_json, parse_json
+from .grammar.reducer import reduce_natural_language
+from .grammar.types import GrammarRule, ReduceOptions
 from .types import (
     BareSexpParts,
     BareSexpResult,
@@ -24,6 +29,7 @@ class BareSexpDocument:
         self._contexts: list[Context] = []
         self._tasks: list[Task] = []
         self._mode: OutputMode = "full"
+        self._reduced_text: str | None = None
 
     def minimal(self) -> BareSexpDocument:
         self._mode = "minimal"
@@ -86,6 +92,51 @@ class BareSexpDocument:
             )
         )
         return self
+
+    def reduce(
+        self,
+        text: str,
+        *,
+        options: ReduceOptions | None = None,
+        custom_rules: list[GrammarRule] | None = None,
+    ) -> BareSexpDocument:
+        """Run the grammar reducer on natural language text.
+
+        Chain with ``use_reduced()`` to attach the simplified text
+        as content to the next task.
+        """
+        opts = options or ReduceOptions()
+        result = reduce_natural_language(text, options=opts, custom_rules=custom_rules)
+        self._reduced_text = result.simplified
+        return self
+
+    def use_reduced(self, task_name: str = "reduced") -> BareSexpDocument:
+        """Use the last reduced text as content for a new task."""
+        if self._reduced_text is not None:
+            return self.task(name=task_name, content=self._reduced_text)
+        return self
+
+    def json(self) -> dict[str, Any] | None:
+        """Decode the last task's content as a BareSexp s-expression."""
+        task = self.last_task()
+        if task is None or not task.content:
+            return None
+        return parse_json(task.content)
+
+    @staticmethod
+    def compile_json(
+        data: dict[str, Any],
+        *,
+        mode: OutputMode = "full",
+        condense: bool = False,
+    ) -> str:
+        """Standalone: compile any JSON-compatible dict into a BareSexp s-expression."""
+        return compile_json(data, mode=mode, condense=condense)
+
+    @staticmethod
+    def parse_json(input: str) -> dict[str, Any]:
+        """Standalone: parse a ``(json ...)`` s-expression into a JSON-compatible dict."""
+        return parse_json(input)
 
     def last_task(self) -> Task | None:
         """Returns the last added task, or None if no tasks."""
